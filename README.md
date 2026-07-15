@@ -1,21 +1,70 @@
 # time_series_forecasting
-Forecasting for Reserve Adequacy — German Electricity Demand
-Overview
-This project forecasts German weekly electricity demand and compares models under a cost-sensitive framework where underforecasting (demand shortfall) is penalised more heavily than overforecasting. Models tested: benchmark forecasts (Mean, Naive, Seasonal Naive, Drift), SARIMA, SARIMAX with temperature and calendar covariates, Quantile Gradient Boosting (median and upper planning forecast), and an hourly LSTM. All models are evaluated on the last 2 years of data (104 weeks).
-Data
+German Electricity Demand Forecasting
+Project Overview
 
-German electricity load from Open Power System Data (hourly, 2015–2020) — downloaded automatically by the notebook
-Berlin temperature from the Open-Meteo archive API — downloaded automatically by the notebook
+This project studies whether the SARIMA model with the lowest training AIC also provides the best two-year electricity-demand forecast.
 
-No manual downloads needed.
-Libraries to install
-pip install pandas numpy matplotlib statsmodels scikit-learn tensorflow holidays requests
-How to run
+German hourly electricity-demand data are aggregated into weekly values and divided chronologically into training and testing periods.
 
-Open the notebook in Google Colab or Jupyter.
-Run all cells from top to bottom (Runtime → Run all).
-That's it — data downloads, models train, and all figures and tables are saved to the outputs folder automatically.
+Main Tasks
+Clean and aggregate German electricity-demand data
+Plot the original and differenced series
+Perform ADF and KPSS stationarity tests
+Examine autocorrelation
+Create Mean, Naive, Seasonal Naive and Drift benchmarks
+Test 147 SARIMA parameter combinations
+Rank SARIMA candidates using AIC
+Compare AIC ranking with test RMSE and MAE
+Inspect residuals using ACF, histograms and Ljung–Box tests
+Build a temperature-based SARIMAX model
+Compare statistical and machine-learning forecasts
+Dataset
+Hourly German electricity demand
+Period: January 2015 to October 2020
+Weekly observations: 301
+Training observations: 197 weeks
+Testing observations: 104 weeks
+Main Libraries
+pandas
+numpy
+matplotlib
+statsmodels
+scikit-learn
+requests
+joblib
+Installation
+pip install pandas numpy matplotlib statsmodels scikit-learn requests joblib
+How to Run
+Open the notebook in Jupyter Notebook or Google Colab.
+Install the required libraries.
+Keep internet access enabled for data retrieval.
+Run all cells in order.
+Allow the SARIMA grid search to complete.
+Review the generated plots, residual diagnostics and metric tables.
+Main Result
 
-Internet connection is required on the first run to download the data. Full run takes a few minutes.
-Results summary
-The Seasonal Naive is the most accurate simple forecast but underforecasts most high-demand winter weeks. SARIMA and SARIMAX rarely underforecast, but only because they are biased high. The Quantile Gradient Boosting upper forecast gives the best balance — it cuts shortfalls by two thirds using an explicit reserve margin of about 1.9% of load, and is the recommended planning forecast. The LSTM is accurate hour-ahead but is a short-term tool, not a long-horizon planning forecast. See the report for full discussion, figures and tables.
+The lowest-AIC model was:
+
+SARIMA(2,0,2)(1,0,1,52)
+
+Its test RMSE was:
+
+3462.86 MW
+
+The third-ranked AIC model was:
+
+SARIMA(1,0,2)(1,0,1,52)
+
+It achieved the best test RMSE:
+
+2904.45 MW
+
+This shows that the model with the lowest training AIC did not produce the strongest out-of-sample forecast.
+
+Important Note
+
+The current Random Forest result should not be used in the final comparison because its recursive history includes test-period observations. The model must be rerun using training history only.
+
+Conclusion
+
+AIC is useful for selecting a shortlist of statistical models, but final model selection should also consider residual diagnostics and genuine out-of-sample forecasting performance.
